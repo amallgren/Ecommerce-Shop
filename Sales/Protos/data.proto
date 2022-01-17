@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "Sales";
+
+package sales;
+
+service Data {
+
+  rpc Add (Receipt) returns (SalesReply);
+}
+
+message Receipt {
+  string orderDetails = 1;
+  string transactionDetails = 2;
+}
+
+message SalesReply {
+  double sales_id = 1;
+}

@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>15c3fc4c-5913-471f-96a7-a8845625a419</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="appsettings.Development.json" />
+    <Content Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="appsettings.Development.json" />
+    <None Include="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.41.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.41.0" />
+    <PackageReference Include="Grpc.Net.Client.Web" Version="2.41.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\Product\Protos\information.proto" GrpcServices="Client">
+      <Link>Protos\information.proto</Link>
+    </Protobuf>
+    <Protobuf Include="..\Sales\Protos\data.proto" GrpcServices="Client">
+      <Link>Protos\data.proto</Link>
+    </Protobuf>
+  </ItemGroup>
+
+</Project>

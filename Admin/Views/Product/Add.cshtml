@@ -1,0 +1,11 @@
+﻿@model Product
+@{
+}
+
+@using(Html.BeginForm(FormMethod.Post, new { enctype="multipart/form-data" }))
+{
+    @Html.TextBoxFor(m => m.Name)<br/>
+    @Html.TextAreaFor(m => m.Description)<br/>
+    <input type="file" name = "ImageData" id = "ImageData" /><br/>
+    <button type="submit">Add</button>
+}

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "Product";
+
+package inform;
+
+service Information {
+  rpc Add (InformationEntity) returns (InformationReply);
+  rpc GetSet (InformationOffering) returns (InformationSet);
+}
+
+message InformationEntity {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  bytes image = 4;
+  double price = 5;
+}
+
+message InformationReply {
+  int32 product_id = 1;
+}
+
+message InformationOffering {
+	int32 set_id = 1;
+	int32 campaign_id = 2;
+}
+
+message InformationSet {
+	repeated InformationEntity items = 1;
+}

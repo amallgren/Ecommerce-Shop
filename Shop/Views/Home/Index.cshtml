@@ -1,0 +1,193 @@
+﻿@using Product
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model InformationSet
+<style>
+    .check-out {
+        position:fixed;
+        left:0px;
+        right:0px;
+        width:100%;
+        text-align:center;
+        background-color:white;
+        border-radius:0px 0px 20px 20px;
+    }
+    article {
+        width:50%;
+        padding-bottom: 50px;
+    }
+    article > .name {
+        text-align:center;
+    }
+    article button {
+        border-radius: 10px;
+        width: 30px;
+        margin: 10px;
+    }
+</style>
+<script src="https://www.paypal.com/sdk/js?client-id=AdgD41oLhFmeG_Ks_qIOXOaQWMEdR2uFhe_c0XvBEs0jFLO1PUaScv615bYqNO0OePoHS4Ure2GI6Owt&currency=USD"></script>
+
+<div id="checkOut" class="check-out" style="padding-bottom:30px;display:none">
+    <div id="checkOutButton" role="button">
+        <h2>Click to Toggle Check Out</h2>
+    </div>
+    <div id="checkOutExtended" style="display:none">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Items</h3>
+                <div id="checkOutItems">
+
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3>Payment & Shipping</h3>
+
+                <div id="paypal-button-container"></div>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+    </div>
+</div>
+<div style="padding-top:100px;">
+@{
+    int counter = 0;
+    foreach(var item in Model.Items)
+    {
+        bool openRow = counter % 2 == 0;
+        bool closeRow = !openRow || counter == (Model.Items.Count - 1);
+
+        string decreaseId = "decreaseProduct" + @item.Id.ToString();
+        string countId = "countProduct" + @item.Id.ToString();
+        string increaseId = "increaseProduct" + @item.Id.ToString();
+
+        if (openRow)
+        {
+            @:<div class="row">
+        }
+        <article class="col-md-6 product">
+            <img width="100%" src="data:image/jpeg;base64, @Convert.ToBase64String(item.Image.ToByteArray())" />
+            <div class="name">
+                <h2>@item.Name</h2>
+            </div>
+            <div class="desciption">@item.Description</div>
+            <div style="float:right;">
+            <span class="price" data-price="@item.Price">$@item.Price</span>
+            <button class="decreaseProduct" data-productId="@item.Id.ToString()" id="@decreaseId">-</button>
+            <span class="productCount" id="@countId">0</span>
+            <button class="increaseProduct" data-productId="@item.Id.ToString()" id="@increaseId">+</button>
+            </div>
+        </article>
+        @if (closeRow)
+        {
+            @:</div>
+        }
+        counter++;
+    }
+}
+</div>
+<script>
+    window.onload = function() {
+        $('.decreaseProduct').click(function() {
+            let productId = $(this).attr('data-productId');
+            let countElement = $('#countProduct' + productId)[0];
+            let count = parseFloat(countElement.innerText);
+            if (count>0) {
+                count--;
+            }
+            countElement.innerText = count;
+            showHideCheckOut();
+        });
+        $('.increaseProduct').click(function() {
+            let productId = $(this).attr('data-productId');
+            let countElement = $('#countProduct' + productId)[0];
+            let count = parseFloat(countElement.innerText);
+            count++;
+            countElement.innerText = count;
+            showHideCheckOut();
+        });
+        $('#checkOutButton').click(function() {
+            if ($('#checkOutExtended').css('display') == 'none') {
+                populateCheckOut();
+                $('#checkOutExtended').css('display', 'initial');
+                $('.arrowIndicator').css('transform', 'rotate(0)');
+            }
+            else {
+                $('#checkOutExtended').css('display', 'none');
+                $('.arrowIndicator').css('transform', 'rotate(180)');
+            }
+        });
+
+        paypal.Buttons({
+
+        // Sets up the transaction when a payment button is clicked
+        createOrder: function(data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: $('#totalAmount').text() // Can reference variables or functions. Example: `value: document.getElementById('...').value`
+              }
+            }]
+          });
+        },
+
+        // Finalize the transaction after payer approval
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(orderData) {
+            // Successful capture! For dev/demo purposes:
+                console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                var transaction = orderData.purchase_units[0].payments.captures[0];
+                alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+
+                var order = {'description': $('#checkOutItems').html(), 'transactionDetails':JSON.stringify(orderData) };
+
+                $.ajax({url: '@Url.Action("SubmitOrder", "Home")',
+                    method: 'POST',
+                    data: JSON.stringify(order)}
+                );
+            // When ready to go live, remove the alert and show a success message within this page. For example:
+            // var element = document.getElementById('paypal-button-container');
+            // element.innerHTML = '';
+            // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+            // Or go to another URL:  actions.redirect('thank_you.html');
+          });
+        }
+      }).render('#paypal-button-container');
+
+    }
+    function populateCheckOut() {
+        $('#checkOutItems').empty();
+        let products = $('article.product');
+        let total = 0;
+        $(products).each(function () {
+            let count = $(this).find('span.productCount')[0].innerText;
+            let countInt = parseFloat(count)
+            if (countInt>0) {
+                let name = $(this).children('div.name')[0].innerText;
+                let price = $(this).find('span.price')[0].getAttribute('data-price');
+                let priceInt = parseFloat(price);
+                let subTotal = countInt * priceInt;
+                total += subTotal;
+                $('#checkOutItems').append('<div>' + name + ' x ' + count + ' @@ $' + price + ' = $' + subTotal + '</div>')
+            }
+        });
+        $('#checkOutItems').append('<div><strong>Total:</strong> $<span id="totalAmount">' + total + '</span></div>')
+    }
+    function showHideCheckOut() {
+        if (getProductCount()==0) {
+            $('#checkOut').css('display', 'none');
+        }
+        else {
+            $('#checkOut').css('display', 'initial');
+            populateCheckOut();
+        }
+    }
+    function getProductCount() {
+        let totalProductCount = 0;
+        let productCounts = $('.productCount');
+        $(productCounts).each(function() {
+            totalProductCount += parseFloat(this.innerText);
+        });
+        return totalProductCount;
+    }
+</script>
