@@ -26,7 +26,7 @@
         margin: 10px;
     }
 </style>
-<script src="https://www.paypal.com/sdk/js?client-id=AdgD41oLhFmeG_Ks_qIOXOaQWMEdR2uFhe_c0XvBEs0jFLO1PUaScv615bYqNO0OePoHS4Ure2GI6Owt&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AeDezh8HXVoyguXxDdYlyeutS70d49CcB7GatFaHWjZopVrVzMgjjZRYuGVkEiak6anY8MMHvCIvv9Fv&currency=USD"></script>
 
 <div id="checkOut" class="check-out" style="padding-bottom:30px;display:none">
     <div id="checkOutButton" role="button">
@@ -137,7 +137,7 @@
             // Successful capture! For dev/demo purposes:
                 console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
                 var transaction = orderData.purchase_units[0].payments.captures[0];
-                alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+                alert('Transaction '+ transaction.status + ': ' + transaction.id);
 
                 var order = {'description': $('#checkOutItems').html(), 'transactionDetails':JSON.stringify(orderData) };
 
