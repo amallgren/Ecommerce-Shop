@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
-builder.Services.AddCors(o => o.AddPolicy("AllowAll", policy => {
-    policy.AllowAnyOrigin();
+builder.Services.AddCors(o => o.AddPolicy("AllowShop", policy => {
+    policy.WithOrigins("shop-anthonymallgren.azurewebsites.net");
     policy.AllowAnyMethod();
     policy.AllowAnyHeader();
     }));
@@ -16,7 +16,7 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", policy => {
 var app = builder.Build();
 
 app.UseRouting();
-app.UseCors("AllowAll");
+app.UseCors("AllowShop");
 app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
 // Configure the HTTP request pipeline.
